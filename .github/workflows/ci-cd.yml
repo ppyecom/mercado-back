@@ -1,0 +1,45 @@
+name: CI/CD Backend
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Type check + build
+        env:
+          DATABASE_URL: "postgresql://u:p@localhost:5432/d"
+          JWT_SECRET: "ci-secret"
+        run: npm run build
+      - name: Tests
+        env:
+          DATABASE_URL: "postgresql://u:p@localhost:5432/d"
+          JWT_SECRET: "ci-secret"
+        run: npm test
+
+  deploy-render:
+    needs: build-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy
+        env:
+          RENDER_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_HOOK" ]; then
+            echo "RENDER_DEPLOY_HOOK_URL no configurado"; exit 1;
+          fi
+          curl -fsSL -X POST "$RENDER_HOOK"
+          echo "Deploy disparado en Render."
