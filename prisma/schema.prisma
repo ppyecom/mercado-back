@@ -33,6 +33,7 @@ model Comerciante {
   puesto       Puesto?  @relation(fields: [puestoId], references: [id])
   turnos       Turno[]
   ingresos     IngresoMercaderia[]
+  incidencias  Incidencia[]
 
   @@map("comerciante")
 }
@@ -113,6 +114,22 @@ model Producto {
   ingresos  IngresoMercaderia[]
 
   @@map("producto")
+}
+
+model Incidencia {
+  id             Int      @id @default(autoincrement())
+  tipo           String   // SEGURIDAD | INFRAESTRUCTURA | SANITARIO | OTRO
+  descripcion    String   @db.Text
+  reportadoPor   String   @default("Anonimo") @map("reportado_por")
+  comercianteId  Int?     @map("comerciante_id")
+  estado         String   @default("PENDIENTE") // PENDIENTE | EN_REVISION | CERRADO
+  fecha          DateTime @default(now())
+
+  comerciante    Comerciante? @relation(fields: [comercianteId], references: [id])
+
+  @@index([estado])
+  @@index([tipo])
+  @@map("incidencia")
 }
 
 model IngresoMercaderia {
