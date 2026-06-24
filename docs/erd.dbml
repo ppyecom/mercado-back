@@ -1,0 +1,86 @@
+// Pegar en https://dbdiagram.io para exportar el ER como PNG -> guardar en docs/ER-diagram.png
+
+Table usuario {
+  id int [pk, increment]
+  nombre varchar
+  email varchar [unique]
+  password_hash varchar
+  rol varchar
+  creado_en timestamp
+}
+
+Table puesto {
+  id int [pk, increment]
+  codigo varchar [unique]
+  zona varchar
+  area_m2 decimal
+  estado varchar
+  creado_en timestamp
+}
+
+Table comerciante {
+  id int [pk, increment]
+  dni varchar [unique]
+  ruc varchar [unique, null]
+  nombres varchar
+  apellidos varchar
+  telefono varchar
+  giro varchar
+  estado varchar
+  puesto_id int [ref: > puesto.id, null]
+  creado_en timestamp
+}
+
+Table estibador {
+  id int [pk, increment]
+  dni varchar [unique]
+  nombres varchar
+  apellidos varchar
+  telefono varchar
+  estado varchar
+  creado_en timestamp
+}
+
+Table tarifa {
+  id int [pk, increment]
+  concepto varchar [unique]
+  monto_soles decimal
+  vigente_desde date
+}
+
+Table turno {
+  id int [pk, increment]
+  estibador_id int [ref: > estibador.id]
+  comerciante_id int [ref: > comerciante.id]
+  tarifa_id int [ref: > tarifa.id]
+  fecha_hora_inicio timestamp
+  fecha_hora_fin timestamp [null]
+  cantidad int
+  monto_total decimal
+  estado varchar
+}
+
+Table proveedor {
+  id int [pk, increment]
+  ruc varchar [unique]
+  razon_social varchar
+  procedencia varchar
+}
+
+Table producto {
+  id int [pk, increment]
+  nombre varchar
+  categoria varchar
+  unidad varchar
+}
+
+Table ingreso_mercaderia {
+  id int [pk, increment]
+  lote varchar [unique]
+  proveedor_id int [ref: > proveedor.id]
+  producto_id int [ref: > producto.id]
+  comerciante_id int [ref: > comerciante.id]
+  cantidad decimal
+  fecha_ingreso timestamp
+  observaciones text
+}

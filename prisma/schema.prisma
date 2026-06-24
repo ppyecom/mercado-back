@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id            Int      @id @default(autoincrement())
+  nombre        String
+  email         String   @unique
+  passwordHash  String   @map("password_hash")
+  rol           String   @default("ADMIN")
+  creadoEn      DateTime @default(now()) @map("creado_en")
+
+  @@map("usuario")
+}
+
+model Comerciante {
+  id           Int      @id @default(autoincrement())
+  dni          String   @unique
+  ruc          String?  @unique
+  nombres      String
+  apellidos    String
+  telefono     String
+  giro         String
+  estado       String   @default("ACTIVO")
+  puestoId     Int?     @unique @map("puesto_id")
+  creadoEn     DateTime @default(now()) @map("creado_en")
+
+  puesto       Puesto?  @relation(fields: [puestoId], references: [id])
+  turnos       Turno[]
+  ingresos     IngresoMercaderia[]
+
+  @@map("comerciante")
+}
+
+model Puesto {
+  id        Int      @id @default(autoincrement())
+  codigo    String   @unique
+  zona      String
+  areaM2    Decimal  @map("area_m2") @db.Decimal(6,2)
+  estado    String   @default("DISPONIBLE")
+  creadoEn  DateTime @default(now()) @map("creado_en")
+
+  comerciante Comerciante?
+
+  @@map("puesto")
+}
+
+model Estibador {
+  id        Int      @id @default(autoincrement())
+  dni       String   @unique
+  nombres   String
+  apellidos String
+  telefono  String
+  estado    String   @default("ACTIVO")
+  creadoEn  DateTime @default(now()) @map("creado_en")
+
+  turnos    Turno[]
+
+  @@map("estibador")
+}
+
+model Tarifa {
+  id             Int      @id @default(autoincrement())
+  concepto       String   @unique
+  montoSoles     Decimal  @map("monto_soles") @db.Decimal(8,2)
+  vigenteDesde   DateTime @map("vigente_desde") @db.Date
+
+  turnos         Turno[]
+
+  @@map("tarifa")
+}
+
+model Turno {
+  id                Int       @id @default(autoincrement())
+  estibadorId       Int       @map("estibador_id")
+  comercianteId     Int       @map("comerciante_id")
+  tarifaId          Int       @map("tarifa_id")
+  fechaHoraInicio   DateTime  @map("fecha_hora_inicio")
+  fechaHoraFin      DateTime? @map("fecha_hora_fin")
+  cantidad          Int
+  montoTotal        Decimal   @map("monto_total") @db.Decimal(10,2)
+  estado            String    @default("PENDIENTE")
+
+  estibador    Estibador   @relation(fields: [estibadorId], references: [id])
+  comerciante  Comerciante @relation(fields: [comercianteId], references: [id])
+  tarifa       Tarifa      @relation(fields: [tarifaId], references: [id])
+
+  @@map("turno")
+}
+
+model Proveedor {
+  id           Int    @id @default(autoincrement())
+  ruc          String @unique
+  razonSocial  String @map("razon_social")
+  procedencia  String
+
+  ingresos     IngresoMercaderia[]
+
+  @@map("proveedor")
+}
+
+model Producto {
+  id        Int    @id @default(autoincrement())
+  nombre    String
+  categoria String
+  unidad    String
+
+  ingresos  IngresoMercaderia[]
+
+  @@map("producto")
+}
+
+model IngresoMercaderia {
+  id             Int      @id @default(autoincrement())
+  lote           String   @unique
+  proveedorId    Int      @map("proveedor_id")
+  productoId     Int      @map("producto_id")
+  comercianteId  Int      @map("comerciante_id")
+  cantidad       Decimal  @db.Decimal(10,2)
+  fechaIngreso   DateTime @default(now()) @map("fecha_ingreso")
+  observaciones  String?  @db.Text
+
+  proveedor    Proveedor   @relation(fields: [proveedorId], references: [id])
+  producto     Producto    @relation(fields: [productoId], references: [id])
+  comerciante  Comerciante @relation(fields: [comercianteId], references: [id])
+
+  @@map("ingreso_mercaderia")
+}
