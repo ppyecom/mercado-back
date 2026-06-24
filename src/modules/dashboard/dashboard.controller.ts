@@ -12,6 +12,8 @@ export async function metrics(_req: Request, res: Response, next: NextFunction) 
       estibadoresActivos,
       turnosHoy,
       ingresosHoy,
+      incidenciasSeguridadPendientes,
+      incidenciasPendientesTotal,
     ] = await Promise.all([
       prisma.comerciante.count({ where: { estado: "ACTIVO" } }),
       prisma.comerciante.count(),
@@ -25,6 +27,8 @@ export async function metrics(_req: Request, res: Response, next: NextFunction) 
       prisma.ingresoMercaderia.count({
         where: { fechaIngreso: { gte: new Date(new Date().setHours(0, 0, 0, 0)) } },
       }),
+      prisma.incidencia.count({ where: { tipo: "SEGURIDAD", estado: "PENDIENTE" } }),
+      prisma.incidencia.count({ where: { estado: "PENDIENTE" } }),
     ]);
 
     const ocupacionPct = puestosTotal === 0 ? 0 : Math.round((puestosOcupados / puestosTotal) * 100);
@@ -39,6 +43,8 @@ export async function metrics(_req: Request, res: Response, next: NextFunction) 
       estibadoresActivos,
       turnosHoy,
       ingresosHoy,
+      incidenciasSeguridadPendientes,
+      incidenciasPendientesTotal,
     });
   } catch (e) { next(e); }
 }

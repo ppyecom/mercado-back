@@ -99,6 +99,36 @@ async function main() {
     skipDuplicates: true,
   });
 
+  await prisma.incidencia.createMany({
+    data: [
+      {
+        tipo: "SEGURIDAD",
+        descripcion: "Sujetos no identificados intentaron cobrar cupo a estibadores en zona B.",
+        reportadoPor: "Anonimo",
+        estado: "PENDIENTE",
+      },
+      {
+        tipo: "INFRAESTRUCTURA",
+        descripcion: "Techo del pasaje principal con goteras tras la ultima lluvia.",
+        reportadoPor: "Comerciante zona A",
+        estado: "EN_REVISION",
+      },
+      {
+        tipo: "SANITARIO",
+        descripcion: "Acumulacion de residuos organicos junto al puesto P-C01.",
+        reportadoPor: "Anonimo",
+        comercianteId: c1.id,
+        estado: "CERRADO",
+      },
+      {
+        tipo: "OTRO",
+        descripcion: "Sugerencia: instalar mas tachos de reciclaje en la zona de carga.",
+        reportadoPor: "Vecino del mercado",
+        estado: "PENDIENTE",
+      },
+    ],
+  });
+
   console.log("Seed completado. Comerciante demo:", c1.dni);
 }
 
