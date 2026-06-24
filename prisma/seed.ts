@@ -4,13 +4,20 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  const passwordHash = await bcrypt.hash("admin123", 10);
+  // En produccion: definir ADMIN_EMAIL y ADMIN_PASSWORD en las env vars.
+  // En local: si no se definen, usa admin@laparada.gob.pe / admin123 (NO usar en produccion).
+  const adminEmail = process.env.ADMIN_EMAIL ?? "admin@laparada.gob.pe";
+  const adminPassword = process.env.ADMIN_PASSWORD ?? "admin123";
+  if (adminPassword === "admin123" && process.env.NODE_ENV === "production") {
+    throw new Error("Rechazado: no se permite seed con password por defecto en produccion. Define ADMIN_PASSWORD.");
+  }
+  const passwordHash = await bcrypt.hash(adminPassword, 12);
   await prisma.usuario.upsert({
-    where: { email: "admin@laparada.gob.pe" },
-    update: {},
+    where: { email: adminEmail },
+    update: { passwordHash },
     create: {
       nombre: "Administrador General",
-      email: "admin@laparada.gob.pe",
+      email: adminEmail,
       passwordHash,
       rol: "ADMIN",
     },
