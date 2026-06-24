@@ -11,6 +11,7 @@ import { estibadoresRoutes } from "./modules/estibadores/estibadores.routes";
 import { turnosRoutes } from "./modules/turnos/turnos.routes";
 import { mercaderiaRoutes } from "./modules/mercaderia/mercaderia.routes";
 import { dashboardRoutes } from "./modules/dashboard/dashboard.routes";
+import { incidenciasRoutes } from "./modules/incidencias/incidencias.routes";
 
 export const app = express();
 
@@ -28,5 +29,6 @@ app.use("/api/estibadores", estibadoresRoutes);
 app.use("/api/turnos", turnosRoutes);
 app.use("/api/mercaderia", mercaderiaRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/incidencias", incidenciasRoutes);
 
 app.use(errorHandler);
